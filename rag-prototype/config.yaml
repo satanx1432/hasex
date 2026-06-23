@@ -1,0 +1,33 @@
+# RAG Prototype Configuration
+
+models:
+  bge_m3:
+    name: "BAAI/bge-m3"
+    dimension: 1024
+    max_length: 512
+    normalize_embeddings: true
+  
+  embedqa_5:
+    name: "nvidia/EmbedQA-5.0"
+    dimension: 768
+    max_length: 512
+    normalize_embeddings: true
+
+reranker:
+  name: "BAAI/bge-reranker-v2-m3"
+  top_k: 5
+
+vector_db:
+  collection_name: "rag_documents"
+  persist_directory: "./chroma_db"
+
+chunking:
+  chunk_size: 512
+  chunk_overlap: 50
+  separators: ["\n\n", "\n", ". ", " ", ""]
+
+search:
+  top_k: 10
+  hybrid_weights:
+    dense: 0.7
+    sparse: 0.3

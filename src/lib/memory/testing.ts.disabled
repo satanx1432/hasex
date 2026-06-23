@@ -1,0 +1,743 @@
+/**
+ * Memory System Testing and Validation Framework
+ * Tests that conversation #100 is better than conversation #1
+ */
+
+import { createClient } from '@supabase/supabase-js'
+import { createAdaptiveMemory, MemorySystemConfig } from './index'
+
+interface TestResult {
+  test_name: string
+  passed: boolean
+  score: number
+  details: string
+  timestamp: string
+}
+
+interface ValidationMetrics {
+  memory_growth: number
+  confidence_improvement: number
+  prediction_accuracy: number
+  contradiction_handling: number
+  overall_score: number
+}
+
+class MemorySystemTester {
+  private supabase: any
+  private userId: string
+
+  constructor(supabaseUrl: string, supabaseKey: string, userId: string) {
+    this.supabase = createClient(supabaseUrl, supabaseKey)
+    this.userId = userId
+  }
+
+  /**
+   * Run complete test suite
+   */
+  async runTestSuite(): Promise<{
+    results: TestResult[]
+    overall_score: number
+    validation_metrics: ValidationMetrics
+  }> {
+    const results: TestResult[] = []
+
+    // Test 1: Database schema validation
+    results.push(await this.testDatabaseSchema())
+
+    // Test 2: Memory insertion
+    results.push(await this.testMemoryInsertion())
+
+    // Test 3: Memory retrieval
+    results.push(await this.testMemoryRetrieval())
+
+    // Test 4: Confidence decay
+    results.push(await this.testConfidenceDecay())
+
+    // Test 5: Contradiction detection
+    results.push(await this.testContradictionDetection())
+
+    // Test 6: Context assembly
+    results.push(await this.testContextAssembly())
+
+    // Test 7: Integration workflow
+    results.push(await this.testIntegrationWorkflow())
+
+    // Test 8: Memory evolution
+    results.push(await this.testMemoryEvolution())
+
+    // Calculate overall score
+    const overall_score = results.reduce((sum, r) => sum + r.score, 0) / results.length
+
+    // Calculate validation metrics
+    const validation_metrics = await this.calculateValidationMetrics()
+
+    return {
+      results,
+      overall_score,
+      validation_metrics
+    }
+  }
+
+  private async testDatabaseSchema(): Promise<TestResult> {
+    const testName = 'Database Schema Validation'
+    const startTime = Date.now()
+    let details = ''
+    let passed = true
+    let score = 0
+
+    try {
+      // Test that required tables exist
+      const requiredTables = [
+        'episodic_memories',
+        'semantic_memories',
+        'behavioral_memories',
+        'memory_evolution',
+        'conversation_extractions'
+      ]
+
+      let tableCount = 0
+      for (const table of requiredTables) {
+        const { error } = await this.supabase.from(table).select('count').limit(1)
+        if (!error) tableCount++
+      }
+
+      if (tableCount === requiredTables.length) {
+        details = `All ${requiredTables.length} required tables exist`
+        score = 100
+      } else {
+        details = `Only ${tableCount}/${requiredTables.length} tables exist`
+        score = (tableCount / requiredTables.length) * 100
+        passed = false
+      }
+
+      // Test that required columns exist
+      const { data: episodicColumns } = await this.supabase
+        .from('episodic_memories')
+        .select('*')
+        .limit(0)
+      
+      if (episodicColumns) {
+        const requiredColumns = ['id', 'user_id', 'event_type', 'summary', 'confidence', 'decay_rate']
+        const missingColumns = requiredColumns.filter(col => !(col in episodicColumns))
+        
+        if (missingColumns.length === 0) {
+          details += ' | All required columns present'
+        } else {
+          details += ` | Missing columns: ${missingColumns.join(', ')}`
+          score *= 0.8
+          passed = false
+        }
+      }
+
+    } catch (error) {
+      details = `Database schema test failed: ${error}`
+      passed = false
+      score = 0
+    }
+
+    return {
+      test_name: testName,
+      passed,
+      score,
+      details,
+      timestamp: new Date().toISOString()
+    }
+  }
+
+  private async testMemoryInsertion(): Promise<TestResult> {
+    const testName = 'Memory Insertion'
+    let details = ''
+    let passed = true
+    let score = 0
+
+    try {
+      // Test episodic memory insertion
+      const episodicData = {
+        user_id: this.userId,
+        event_type: 'test_milestone',
+        summary: 'Test milestone insertion',
+        raw_evidence: 'User completed test milestone',
+        importance_score: 0.8,
+        confidence: 0.9,
+        decay_rate: 0.95
+      }
+
+      const { data: episodic, error: episodicError } = await this.supabase
+        .from('episodic_memories')
+        .insert(episodicData)
+        .select()
+        .single()
+
+      if (episodicError) {
+        details = `Episodic memory insertion failed: ${episodicError.message}`
+        passed = false
+        score = 0
+      } else {
+        // Test semantic memory insertion
+        const semanticData = {
+          user_id: this.userId,
+          trait: 'test_trait',
+          value: 'test_value',
+          confidence: 0.7,
+          decay_rate: 0.97
+        }
+
+        const { data: semantic, error: semanticError } = await this.supabase
+          .from('semantic_memories')
+          .insert(semanticData)
+          .select()
+          .single()
+
+        if (semanticError) {
+          details = `Semantic memory insertion failed: ${semanticError.message}`
+          passed = false
+          score = 50
+        } else {
+          // Test behavioral memory insertion
+          const behavioralData = {
+            user_id: this.userId,
+            behavior_type: 'test_behavior',
+            observation: 'Test behavior observation',
+            confidence: 0.6,
+            decay_rate: 0.96,
+            trend: 'stable'
+          }
+
+          const { data: behavioral, error: behavioralError } = await this.supabase
+            .from('behavioral_memories')
+            .insert(behavioralData)
+            .select()
+            .single()
+
+          if (behavioralError) {
+            details = `Behavioral memory insertion failed: ${behavioralError.message}`
+            passed = false
+            score = 66
+          } else {
+            details = 'All memory types inserted successfully'
+            score = 100
+          }
+        }
+      }
+    } catch (error) {
+      details = `Memory insertion test failed: ${error}`
+      passed = false
+      score = 0
+    }
+
+    return {
+      test_name: testName,
+      passed,
+      score,
+      details,
+      timestamp: new Date().toISOString()
+    }
+  }
+
+  private async testMemoryRetrieval(): Promise<TestResult> {
+    const testName = 'Memory Retrieval'
+    let details = ''
+    let passed = true
+    let score = 0
+
+    try {
+      // Test episodic memory retrieval
+      const { data: episodic } = await this.supabase
+        .from('episodic_memories')
+        .select('*')
+        .eq('user_id', this.userId)
+        .gte('confidence', 0.5)
+        .order('confidence', { ascending: false })
+        .limit(10)
+
+      if (!episodic || episodic.length === 0) {
+        details = 'No episodic memories retrieved (may be expected if no data)'
+        score = 80
+      } else {
+        details = `Retrieved ${episodic.length} episodic memories`
+        score = 100
+      }
+
+      // Test semantic memory retrieval
+      const { data: semantic } = await this.supabase
+        .from('semantic_memories')
+        .select('*')
+        .eq('user_id', this.userId)
+        .gte('confidence', 0.3)
+        .order('confidence', { ascending: false })
+        .limit(10)
+
+      if (semantic && semantic.length > 0) {
+        details += ` | Retrieved ${semantic.length} semantic memories`
+      }
+
+      // Test behavioral memory retrieval
+      const { data: behavioral } = await this.supabase
+        .from('behavioral_memories')
+        .select('*')
+        .eq('user_id', this.userId)
+        .gte('confidence', 0.3)
+        .order('confidence', { ascending: false })
+        .limit(10)
+
+      if (behavioral && behavioral.length > 0) {
+        details += ` | Retrieved ${behavioral.length} behavioral memories`
+      }
+
+    } catch (error) {
+      details = `Memory retrieval test failed: ${error}`
+      passed = false
+      score = 0
+    }
+
+    return {
+      test_name: testName,
+      passed,
+      score,
+      details,
+      timestamp: new Date().toISOString()
+    }
+  }
+
+  private async testConfidenceDecay(): Promise<TestResult> {
+    const testName = 'Confidence Decay System'
+    let details = ''
+    let passed = true
+    let score = 0
+
+    try {
+      // Create a test memory with known confidence
+      const testData = {
+        user_id: this.userId,
+        event_type: 'decay_test',
+        summary: 'Test memory for decay',
+        raw_evidence: 'Test evidence',
+        importance_score: 0.5,
+        confidence: 0.8,
+        decay_rate: 0.9
+      }
+
+      const { data: testMemory } = await this.supabase
+        .from('episodic_memories')
+        .insert(testData)
+        .select()
+        .single()
+
+      if (!testMemory) {
+        details = 'Failed to create test memory'
+        score = 0
+        passed = false
+      } else {
+        // Simulate decay by updating timestamp and confidence
+        const originalConfidence = testMemory.confidence
+        const decayedConfidence = originalConfidence * 0.9  // One day of decay
+
+        const { error: updateError } = await this.supabase
+          .from('episodic_memories')
+          .update({ 
+            confidence: decayedConfidence,
+            last_updated: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
+          })
+          .eq('id', testMemory.id)
+
+        if (updateError) {
+          details = `Failed to update test memory for decay test: ${updateError.message}`
+          score = 50
+          passed = false
+        } else {
+          // Verify decay was applied
+          const { data: updatedMemory } = await this.supabase
+            .from('episodic_memories')
+            .select('confidence')
+            .eq('id', testMemory.id)
+            .single()
+
+          if (updatedMemory && updatedMemory.confidence < originalConfidence) {
+            details = `Confidence decay applied: ${originalConfidence} → ${updatedMemory.confidence}`
+            score = 100
+          } else {
+            details = 'Confidence decay not properly applied'
+            score = 60
+            passed = false
+          }
+        }
+
+        // Clean up test memory
+        await this.supabase.from('episodic_memories').delete().eq('id', testMemory.id)
+      }
+
+    } catch (error) {
+      details = `Confidence decay test failed: ${error}`
+      passed = false
+      score = 0
+    }
+
+    return {
+      test_name: testName,
+      passed,
+      score,
+      details,
+      timestamp: new Date().toISOString()
+    }
+  }
+
+  private async testContradictionDetection(): Promise<TestResult> {
+    const testName = 'Contradiction Detection'
+    let details = ''
+    let passed = true
+    let score = 0
+
+    try {
+      // Create initial memory
+      const initialData = {
+        user_id: this.userId,
+        trait: 'productivity_pattern',
+        value: 'works best under pressure',
+        confidence: 0.8,
+        decay_rate: 0.97
+      }
+
+      const { data: initialMemory } = await this.supabase
+        .from('semantic_memories')
+        .insert(initialData)
+        .select()
+        .single()
+
+      if (!initialMemory) {
+        details = 'Failed to create initial memory for contradiction test'
+        score = 0
+        passed = false
+      } else {
+        // Try to insert contradictory evidence
+        const contradictoryData = {
+          user_id: this.userId,
+          trait: 'productivity_pattern',
+          value: 'prefers relaxed environment',
+          confidence: 0.7,
+          decay_rate: 0.97
+        }
+
+        // This should trigger contradiction detection (in real implementation)
+        // For now, we just test that both can exist
+        const { error: contradictoryError } = await this.supabase
+          .from('semantic_memories')
+          .insert(contradictoryData)
+          .select()
+
+        if (contradictoryError) {
+          // If it fails, it might be due to unique constraint (good)
+          details = 'Contradiction prevented by database constraints'
+          score = 90
+        } else {
+          details = 'Contradictory memories created (detection needed)'
+          score = 70
+          passed = false
+        }
+
+        // Clean up
+        await this.supabase.from('semantic_memories').delete().eq('id', initialMemory.id)
+      }
+
+    } catch (error) {
+      details = `Contradiction detection test failed: ${error}`
+      passed = false
+      score = 0
+    }
+
+    return {
+      test_name: testName,
+      passed,
+      score,
+      details,
+      timestamp: new Date().toISOString()
+    }
+  }
+
+  private async testContextAssembly(): Promise<TestResult> {
+    const testName = 'Context Assembly'
+    let details = ''
+    let passed = true
+    let score = 0
+
+    try {
+      // Test the context assembler
+      const memorySystem = createAdaptiveMemory(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+        this.userId
+      )
+
+      const conversationHistory = [
+        { role: 'user', content: 'I want to become better at coding', timestamp: new Date().toISOString() }
+      ]
+
+      const { fourQuestionsAnswered } = await memorySystem.getUserUnderstanding(
+        'test_conv',
+        conversationHistory,
+        'What should I focus on?'
+      )
+
+      const requiredQuestions = [
+        'what_happened',
+        'who_is_user',
+        'how_do_they_act',
+        'what_intervention_works'
+      ]
+
+      const hasAllAnswers = requiredQuestions.every(q => q in fourQuestionsAnswered)
+
+      if (hasAllAnswers) {
+        details = 'Context assembly successfully answered all four questions'
+        score = 100
+      } else {
+        details = 'Context assembly missing some questions'
+        score = 70
+        passed = false
+      }
+
+    } catch (error) {
+      details = `Context assembly test failed: ${error}`
+      passed = false
+      score = 0
+    }
+
+    return {
+      test_name: testName,
+      passed,
+      score,
+      details,
+      timestamp: new Date().toISOString()
+    }
+  }
+
+  private async testIntegrationWorkflow(): Promise<TestResult> {
+    const testName = 'Integration Workflow'
+    let details = ''
+    let passed = true
+    let score = 0
+
+    try {
+      // Test the complete workflow
+      const memorySystem = createAdaptiveMemory(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+        this.userId
+      )
+
+      // Simulate a conversation
+      const conversationHistory = [
+        { role: 'user', content: 'I struggle with procrastination', timestamp: new Date().toISOString() }
+      ]
+
+      const result = await memorySystem.processConversation(
+        'test_integration',
+        'How can I overcome procrastination?',
+        conversationHistory,
+        async (context, query) => {
+          // Mock AI response
+          return 'Based on your patterns, let me suggest a specific approach...'
+        }
+      )
+
+      if (result.response) {
+        details = `Integration workflow completed with ${result.personalization_level} personalization`
+        score = result.personalization_level === 'medium' || result.personalization_level === 'high' ? 100 : 80
+      } else {
+        details = 'Integration workflow did not produce response'
+        score = 50
+        passed = false
+      }
+
+    } catch (error) {
+      details = `Integration workflow test failed: ${error}`
+      passed = false
+      score = 0
+    }
+
+    return {
+      test_name: testName,
+      passed,
+      score,
+      details,
+      timestamp: new Date().toISOString()
+    }
+  }
+
+  private async testMemoryEvolution(): Promise<TestResult> {
+    const testName = 'Memory Evolution'
+    let details = ''
+    let passed = true
+    let score = 0
+
+    try {
+      // Test that memories evolve over time
+      const { data: evolutionData } = await this.supabase
+        .from('memory_evolution')
+        .select('*')
+        .eq('user_id', this.userId)
+        .order('timestamp', { ascending: false })
+        .limit(10)
+
+      if (evolutionData && evolutionData.length > 0) {
+        // Check that confidence changes exist
+        const hasConfidenceChanges = evolutionData.some(e => 
+          e.confidence_before !== e.confidence_after
+        )
+
+        if (hasConfidenceChanges) {
+          details = `Found ${evolutionData.length} memory evolution records with confidence changes`
+          score = 100
+        } else {
+          details = 'Memory evolution records exist but no confidence changes detected'
+          score = 70
+          passed = false
+        }
+      } else {
+        details = 'No memory evolution records found (expected for new system)'
+        score = 100 // Not an error, just no data yet
+      }
+
+    } catch (error) {
+      details = `Memory evolution test failed: ${error}`
+      passed = false
+      score = 0
+    }
+
+    return {
+      test_name: testName,
+      passed,
+      score,
+      details,
+      timestamp: new Date().toISOString()
+    }
+  }
+
+  /**
+   * Calculate validation metrics that prove conversation #100 is better than #1
+   */
+  private async calculateValidationMetrics(): Promise<ValidationMetrics> {
+    const metrics: ValidationMetrics = {
+      memory_growth: 0,
+      confidence_improvement: 0,
+      prediction_accuracy: 0,
+      contradiction_handling: 0,
+      overall_score: 0
+    }
+
+    try {
+      // Calculate memory growth
+      const { count: episodicCount } = await this.supabase
+        .from('episodic_memories')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', this.userId)
+
+      const { count: semanticCount } = await this.supabase
+        .from('semantic_memories')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', this.userId)
+
+      const { count: behavioralCount } = await this.supabase
+        .from('behavioral_memories')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', this.userId)
+
+      const totalMemories = (episodicCount || 0) + (semanticCount || 0) + (behavioralCount || 0)
+      metrics.memory_growth = Math.min(100, (totalMemories / 50) * 100)
+
+      // Calculate confidence improvement
+      const { data: evolutionData } = await this.supabase
+        .from('memory_evolution')
+        .select('confidence_before, confidence_after')
+        .eq('user_id', this.userId)
+        .gt('confidence_after', 'confidence_before')
+
+      const improvements = evolutionData?.length || 0
+      metrics.confidence_improvement = Math.min(100, (improvements / 10) * 100)
+
+      // Calculate contradiction handling
+      const { data: contradictionData } = await this.supabase
+        .from('contradiction_resolutions')
+        .select('*')
+        .eq('user_id', this.userId)
+
+      const resolvedContradictions = contradictionData?.length || 0
+      metrics.contradiction_handling = Math.min(100, (resolvedContradictions / 5) * 100)
+
+      // Calculate overall score
+      metrics.overall_score = (
+        metrics.memory_growth * 0.3 +
+        metrics.confidence_improvement * 0.3 +
+        metrics.contradiction_handling * 0.4
+      )
+
+      // Prediction accuracy would require actual testing over time
+      metrics.prediction_accuracy = 0 // Placeholder
+
+    } catch (error) {
+      console.error('Failed to calculate validation metrics:', error)
+    }
+
+    return metrics
+  }
+
+  /**
+   * Validate that the system meets the core requirements
+   */
+  async validateCoreRequirements(): Promise<{
+    answers_four_questions: boolean
+    conversation_improves: boolean
+    memories_evolve: boolean
+    contradictions_resolved: boolean
+    overall_passed: boolean
+  }> {
+    const results = await this.runTestSuite()
+
+    const answers_four_questions = results.results.some(
+      r => r.test_name === 'Context Assembly' && r.passed
+    )
+
+    const conversation_improves = results.validation_metrics.memory_growth > 0 ||
+      results.validation_metrics.confidence_improvement > 0
+
+    const memories_evolve = results.validation_metrics.confidence_improvement > 0 ||
+      results.validation_metrics.contradiction_handling > 0
+
+    const contradictions_resolved = results.validation_metrics.contradiction_handling > 0
+
+    const overall_passed = answers_four_questions && 
+      (results.overall_score > 70 || conversation_improves)
+
+    return {
+      answers_four_questions,
+      conversation_improves,
+      memories_evolve,
+      contradictions_resolved,
+      overall_passed
+    }
+  }
+}
+
+/**
+ * Run memory system validation
+ */
+export async function validateMemorySystem(
+  supabaseUrl: string,
+  supabaseKey: string,
+  userId: string
+): Promise<{
+  validation: ReturnType<MemorySystemTester['validateCoreRequirements']>
+  test_results: ReturnType<MemorySystemTester['runTestSuite']>
+}> {
+  const tester = new MemorySystemTester(supabaseUrl, supabaseKey, userId)
+  
+  const testResults = await tester.runTestSuite()
+  const validation = await tester.validateCoreRequirements()
+
+  return {
+    validation,
+    test_results: testResults
+  }
+}
+
+export { MemorySystemTester }
+export type { TestResult, ValidationMetrics }

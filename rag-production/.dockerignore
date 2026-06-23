@@ -1,0 +1,50 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+.venv
+
+# Models cache
+models/
+*.bin
+*.safetensors
+*.json
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Evaluation results
+evaluation_results.json
+benchmark_results.json
+comprehensive_tradeoff_analysis.json
+model_selection.json
+
+# Documentation
+*.md
+docs/
+
+# Tests
+tests/
+test_*.py
