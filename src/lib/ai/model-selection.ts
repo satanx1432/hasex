@@ -35,14 +35,14 @@ export const MODEL_CONFIGS: Record<ModelTask, ModelConfig> = {
   interview: {
     primary: 'Nemotron 550B',
     fallback1: 'DeepSeek V4 Pro',
-    fallback2: 'GLM 5.1',
+    fallback2: 'Qwen3.5-397B',
     fallback3: 'Mistral 675B'
   },
   
   // Roadmap Generation: DeepSeek V4 Pro (The Logic Architect)
   roadmap: {
     primary: 'DeepSeek V4 Pro',
-    fallback1: 'GLM 5.1',
+    fallback1: 'Qwen3.5-397B',
     fallback2: 'Nemotron 550B',
     fallback3: 'MiniMax M2.7'
   },
@@ -60,7 +60,7 @@ export const MODEL_CONFIGS: Record<ModelTask, ModelConfig> = {
     primary: 'Kimi K2.6',
     fallback1: 'Mistral 675B',
     fallback2: 'MiniMax M2.7',
-    fallback3: 'GLM 5.1'
+    fallback3: 'Qwen3.5-397B'
   },
   
   // Complex Decisions: Nemotron 550B (The Master Strategist)
@@ -68,7 +68,7 @@ export const MODEL_CONFIGS: Record<ModelTask, ModelConfig> = {
     primary: 'Nemotron 550B',
     fallback1: 'DeepSeek V4 Pro',
     fallback2: 'Mistral 675B',
-    fallback3: 'GLM 5.1'
+    fallback3: 'Qwen3.5-397B'
   },
   
   // Memory Summarization: MiniMax M2.7 (The Pattern Synth)

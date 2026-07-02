@@ -1,8 +1,15 @@
 import { GenerateActionRequest, GenerateActionResponse, FeedbackAnalysisRequest, FeedbackAnalysisResponse } from '@/types'
 import { MODEL_STACK, ModelConfig } from './model-stack'
+import OpenAI from 'openai'
 
 const NVIDIA_NIM_ENDPOINT = process.env.NVIDIA_NIM_ENDPOINT || 'https://integrate.api.nvidia.com/v1'
 const NVIDIA_NIM_API_KEY = process.env.NVIDIA_NIM_API_KEY
+
+// OpenAI SDK client for NVIDIA NIM
+const openai = new OpenAI({
+  apiKey: NVIDIA_NIM_API_KEY || '',
+  baseURL: 'https://integrate.api.nvidia.com/v1',
+})
 
 export class NVIDIANIMService {
   isConfigured(): boolean {
@@ -42,32 +49,14 @@ export class NVIDIANIMService {
       throw new Error('NVIDIA NIM API key is not configured. Add NVIDIA_NIM_API_KEY to your environment variables.')
     }
 
-    const response = await fetch(`${NVIDIA_NIM_ENDPOINT}/chat/completions`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${NVIDIA_NIM_API_KEY}`,
-      },
-      body: JSON.stringify({
-        model,
-        messages,
-        temperature,
-        max_tokens: maxTokens,
-      }),
+    const completion = await openai.chat.completions.create({
+      model,
+      messages,
+      temperature,
+      max_tokens: maxTokens,
     })
 
-    if (!response.ok) {
-      if (response.status === 429) {
-        throw new Error('Rate limit exceeded. Please try again later.')
-      }
-      if (response.status === 401) {
-        throw new Error('Invalid NVIDIA NIM API key. Check your credentials.')
-      }
-      throw new Error(`NVIDIA NIM API error: ${response.statusText}`)
-    }
-
-    const data = await response.json()
-    return data.choices[0].message.content
+    return completion.choices[0]?.message?.content || ''
   }
 
   async chat(request: {
@@ -294,6 +283,10 @@ Calibrate the next action.`
       throw new Error('NVIDIA NIM API key is not configured.')
     }
 
+    // BGE M3: Best multilingual embedding model for RAG
+    // - Supports 100+ languages
+    // - 1024 embedding dimensions
+    // - Optimized for dense retrieval
     const response = await fetch(`${NVIDIA_NIM_ENDPOINT}/embeddings`, {
       method: 'POST',
       headers: {
@@ -301,7 +294,7 @@ Calibrate the next action.`
         'Authorization': `Bearer ${NVIDIA_NIM_API_KEY}`,
       },
       body: JSON.stringify({
-        model: 'nvidia/llama-3.3-nemotron-super-49b-a16k-instruct',
+        model: 'BAAI/bge-m3',
         input: texts,
       }),
     })

@@ -329,14 +329,14 @@ export class WebhookSystem {
     return []
   }
 
-  async getWebhookStats(webhookId: string): Promise<{
+  async getWebhookStats(userId: string, webhookId: string): Promise<{
     total_triggers: number
     success_rate: number
     average_response_time: number
     last_triggered: string | null
     recent_errors: string[]
   }> {
-    const webhook = await this.getWebhook(webhookId)
+    const webhook = await this.getWebhook(userId, webhookId)
     if (!webhook) {
       throw new Error('Webhook not found')
     }
@@ -443,14 +443,14 @@ export class WebhookSystem {
     ]
   }
 
-  async regenerateSecret(webhookId: string): Promise<string> {
-    const webhook = await this.getWebhook(webhookId)
+  async regenerateSecret(userId: string, webhookId: string): Promise<string> {
+    const webhook = await this.getWebhook(userId, webhookId)
     if (!webhook) {
       throw new Error('Webhook not found')
     }
 
     const newSecret = this.generateSecret()
-    await this.updateWebhook(webhookId, { secret: newSecret })
+    await this.db.updateWebhook(webhookId, { secret: newSecret })
 
     return newSecret
   }

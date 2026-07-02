@@ -1,11 +1,11 @@
 /**
  * Hybrid Model Router for AI Execution Coach
  * 
- * Routes requests to the best AI model (GLM 5.1, Kimi K2.6, or Nemotron 550B)
+ * Routes requests to the best AI model (Qwen3.5-397B, Kimi K2.6, or Nemotron 550B)
  * based on task complexity, context length, and reasoning requirements.
  */
 
-export type ModelType = 'GLM_5_1' | 'KIMI_K2_6' | 'NEMOTRON_550B'
+export type ModelType = 'QWEN_3_5_397B' | 'KIMI_K2_6' | 'NEMOTRON_550B'
 
 export interface RoutingContext {
   task_type: 'new_goal' | 'roadmap' | 'milestones' | 'daily_actions' | 'structured_plans' | 'user_profiling' | 'deep_discussion' | 'complex_analysis' | 'strategic_planning' | 'difficult_reasoning'
@@ -49,13 +49,13 @@ export class ModelRouter {
     context_priority: ModelType
     complexity_priority: ModelType
   } {
-    let task_priority: ModelType = 'GLM_5_1'
-    let context_priority: ModelType = 'GLM_5_1'
-    let complexity_priority: ModelType = 'GLM_5_1'
+    let task_priority: ModelType = 'QWEN_3_5_397B'
+    let context_priority: ModelType = 'QWEN_3_5_397B'
+    let complexity_priority: ModelType = 'QWEN_3_5_397B'
 
     // Task-based routing
     if (this.isStructuredTask(context.task_type)) {
-      task_priority = 'GLM_5_1'
+      task_priority = 'QWEN_3_5_397B'
     } else if (this.isConversationTask(context.task_type)) {
       task_priority = 'KIMI_K2_6'
     } else if (this.isComplexTask(context.task_type)) {
@@ -84,8 +84,8 @@ export class ModelRouter {
    */
   private selectModel(factors: ReturnType<ModelRouter['analyzeRoutingFactors']>, context: RoutingContext): ModelType {
     // Priority order: task > context > complexity
-    if (factors.task_priority === 'GLM_5_1' && factors.context_priority === 'GLM_5_1' && factors.complexity_priority === 'GLM_5_1') {
-      return 'GLM_5_1'
+    if (factors.task_priority === 'QWEN_3_5_397B' && factors.context_priority === 'QWEN_3_5_397B' && factors.complexity_priority === 'QWEN_3_5_397B') {
+      return 'QWEN_3_5_397B'
     }
 
     // If any factor requires Kimi, use Kimi
@@ -98,8 +98,8 @@ export class ModelRouter {
       return 'NEMOTRON_550B'
     }
 
-    // Default to GLM
-    return 'GLM_5_1'
+    // Default to Qwen3.5-397B for structured tasks
+    return 'QWEN_3_5_397B'
   }
 
   /**
@@ -109,9 +109,9 @@ export class ModelRouter {
     const reasons: string[] = []
 
     switch (selectedModel) {
-      case 'GLM_5_1':
-        reasons.push('GLM 5.1 selected for structured output and reliable instruction following')
-        if (factors.task_priority === 'GLM_5_1') reasons.push('Task requires goal analysis and planning')
+      case 'QWEN_3_5_397B':
+        reasons.push('Qwen3.5-397B selected for structured output and reliable instruction following')
+        if (factors.task_priority === 'QWEN_3_5_397B') reasons.push('Task requires goal analysis and planning')
         break
       case 'KIMI_K2_6':
         reasons.push('Kimi K2.6 selected for long context handling and conversational memory')

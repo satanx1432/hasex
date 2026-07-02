@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/contexts/auth-context";
+import { UxQuestionnaireProvider } from "@/components/ux/questionnaire-context";
+import { UxQuestionnaireModal } from "@/components/ux/questionnaire-modal";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -31,7 +33,12 @@ export default function RootLayout({
       className={`${inter.variable} ${jetbrainsMono.variable} h-full antialiased dark`}
     >
       <body className="min-h-full flex flex-col">
-        <AuthProvider>{children}</AuthProvider>
+        <AuthProvider>
+          <UxQuestionnaireProvider>
+            {children}
+            <UxQuestionnaireModal />
+          </UxQuestionnaireProvider>
+        </AuthProvider>
       </body>
     </html>
   );

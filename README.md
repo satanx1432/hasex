@@ -1,36 +1,50 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# BOS - AI-Powered Productivity System
+
+A next-generation productivity application that combines intelligent goal management with AI-powered execution coaching.
+
+## Features
+
+### 🎯 Smart Goal Management
+- AI-validated goals with automatic refinement
+- Priority-based task organization
+- Progress tracking with visual feedback
+- Goal decomposition into actionable steps
+
+### 🤖 AI Execution Coach
+- Real-time task guidance and suggestions
+- Personalized coaching based on your work patterns
+- Smart reminders and focus prompts
+- Adaptive learning from your behavior
+
+### 📊 Intelligent Dashboard
+- Three-screen navigation: Goals, Tasks, and Coach
+- Real-time metrics and insights
+- Gamification elements for motivation
+- Achievement tracking and rewards
+
+### 🔔 Smart Notifications
+- Context-aware reminders
+- Push notifications for important updates
+- Customizable notification preferences
+
+## Screens
+
+### Goals Screen
+View and manage your objectives with AI-powered insights.
+
+### Tasks Screen
+Track daily tasks with intelligent prioritization and coaching.
+
+### Coach Screen
+Get personalized guidance and support from your AI assistant.
 
 ## Getting Started
 
-First, run the development server:
+1. Sign in with your account
+2. Set up your first goal
+3. Let the AI coach guide your progress
+4. Track your achievements
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## Support
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+For technical support, contact the development team.

@@ -1,7 +1,11 @@
 const NVIDIA_NIM_ENDPOINT = process.env.NVIDIA_NIM_ENDPOINT || 'https://integrate.api.nvidia.com/v1'
 const NVIDIA_NIM_API_KEY = process.env.NVIDIA_NIM_API_KEY
 
-const EMBEDDING_MODEL = 'nvidia/llama-3.3-nemotron-super-49b-a16k-instruct'
+// BGE M3: Best multilingual embedding model for RAG
+// - Supports 100+ languages
+// - 1024 embedding dimensions
+// - Optimized for dense retrieval
+const EMBEDDING_MODEL = 'BAAI/bge-m3'
 
 class EmbeddingService {
   isConfigured(): boolean {

@@ -90,9 +90,9 @@ class AIOrchestrator {
    * Select the best model for the goal
    */
   private selectModel(goal: string, category: string): string {
-    // Academic goals → GLM 5.1 (planning, structured reasoning)
+    // Academic goals → Qwen3.5-397B (planning, structured reasoning)
     if (category === 'academic') {
-      return 'GLM_5_1'
+      return 'QWEN_3_5_397B'
     }
 
     // Startup/business goals → Kimi K2.6 (deep reasoning, research, complex analysis)
@@ -105,14 +105,14 @@ class AIOrchestrator {
       return 'NEMOTRON_550B'
     }
 
-    // Health/fitness → GLM 5.1 (structured planning)
+    // Health/fitness → Qwen3.5-397B (structured planning)
     if (category === 'health') {
-      return 'GLM_5_1'
+      return 'QWEN_3_5_397B'
     }
 
-    // Skill development → GLM 5.1 (long-term decomposition)
+    // Skill development → Qwen3.5-397B (long-term decomposition)
     if (category === 'skill') {
-      return 'GLM_5_1'
+      return 'QWEN_3_5_397B'
     }
 
     // Habit formation → Nemotron 550B (coaching, conversation)
@@ -120,8 +120,8 @@ class AIOrchestrator {
       return 'NEMOTRON_550B'
     }
 
-    // Default to GLM 5.1
-    return 'GLM_5_1'
+    // Default to Qwen3.5-397B
+    return 'QWEN_3_5_397B'
   }
 
   /**
@@ -205,14 +205,14 @@ Keep responses concise and actionable.`
    */
   private getModelName(model: string): string {
     switch (model) {
-      case 'GLM_5_1':
-        return 'nvidia/llama-3.1-nemotron-70b-instruct' // Using Nemotron for GLM tasks
+      case 'QWEN_3_5_397B':
+        return 'qwen/qwen3.5-397b-a17b'
       case 'KIMI_K2_6':
         return 'moonshotai/kimi-k2-6'
       case 'NEMOTRON_550B':
         return 'nvidia/llama-3.1-nemotron-70b-instruct'
       default:
-        return 'nvidia/llama-3.1-nemotron-70b-instruct'
+        return 'qwen/qwen3.5-397b-a17b'
     }
   }
 

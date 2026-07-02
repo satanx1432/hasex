@@ -134,7 +134,7 @@ export class GoalFlowManager {
             biggest_bottleneck: '',
             coaching_style: ''
           },
-          model_used: 'GLM_5_1',
+          model_used: 'QWEN_3_5_397B',
           confidence: 0
         }
       }
@@ -257,9 +257,8 @@ Focus on the immediate next action and make the user feel understood. The AI val
       // Map our model types to actual NVIDIA NIM model names
       let modelName: string
       switch (model) {
-        case 'GLM_5_1':
-          // Use Nemotron for GLM tasks for now (we can update with actual GLM model when available)
-          modelName = 'nvidia/llama-3.1-nemotron-70b-instruct'
+        case 'QWEN_3_5_397B':
+          modelName = 'qwen/qwen3.5-397b-a17b'
           break
         case 'KIMI_K2_6':
           modelName = 'moonshotai/kimi-k2-6'
@@ -268,7 +267,7 @@ Focus on the immediate next action and make the user feel understood. The AI val
           modelName = 'nvidia/llama-3.1-nemotron-70b-instruct'
           break
         default:
-          modelName = 'nvidia/llama-3.1-nemotron-70b-instruct'
+          modelName = 'qwen/qwen3.5-397b-a17b'
       }
 
       const { nvidiaNIMService } = await import('./nvidia-nim')

@@ -1,10 +1,23 @@
 import { createClient } from '@/lib/supabase/client'
+import * as guestData from './guest-data'
 
-const supabase = createClient() as any
+export async function getSupabaseClient() {
+  return createClient() as any
+}
+
+// Helper to check if user is guest
+function isGuestUser(userId: string): boolean {
+  return userId === 'guest' || !userId
+}
 
 // ---------- GOALS ----------
 
 export async function createGoal(userId: string, title: string, classification: any) {
+  if (isGuestUser(userId)) {
+    return guestData.saveGuestGoal({ title, classification, status: 'active' })
+  }
+  
+  const supabase = await getSupabaseClient()
   const { data, error } = await supabase
     .from('goals')
     .insert({ user_id: userId, title, classification, status: 'active' })
@@ -16,6 +29,11 @@ export async function createGoal(userId: string, title: string, classification: 
 }
 
 export async function getActiveGoal(userId: string) {
+  if (isGuestUser(userId)) {
+    return guestData.getActiveGuestGoal()
+  }
+  
+  const supabase = await getSupabaseClient()
   const { data, error } = await supabase
     .from('goals')
     .select('*')
@@ -28,6 +46,22 @@ export async function getActiveGoal(userId: string) {
   return data
 }
 
+export async function getAllGoals(userId: string) {
+  if (isGuestUser(userId)) {
+    return guestData.getGuestGoals()
+  }
+  
+  const supabase = await getSupabaseClient()
+  const { data, error } = await supabase
+    .from('goals')
+    .select('*')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false })
+
+  if (error) throw error
+  return data || []
+}
+
 // ---------- DESTINATIONS ----------
 
 export async function createDestination(userId: string, goalId: string, destination: {
@@ -36,6 +70,7 @@ export async function createDestination(userId: string, goalId: string, destinat
   complexity: 'low' | 'medium' | 'high'
   reason: string
 }) {
+  const supabase = await getSupabaseClient()
   const { data, error } = await supabase
     .from('destinations')
     .insert({ user_id: userId, goal_id: goalId, ...destination })
@@ -54,6 +89,7 @@ export async function createRoadmap(userId: string, goalId: string, destinationI
   sort_order: number
   category?: string
 }[]) {
+  const supabase = await getSupabaseClient()
   const { data: roadmap, error: roadmapError } = await supabase
     .from('roadmaps')
     .insert({ user_id: userId, goal_id: goalId, destination_id: destinationId, status: 'active' })
@@ -82,6 +118,7 @@ export async function createRoadmap(userId: string, goalId: string, destinationI
 }
 
 export async function getActiveRoadmap(userId: string) {
+  const supabase = await getSupabaseClient()
   const { data: goal, error: goalError } = await supabase
     .from('goals')
     .select('*')
@@ -153,6 +190,7 @@ export async function createTask(userId: string, goalId: string, stageId: string
   estimated_minutes?: number
   scheduled_for?: string
 }) {
+  const supabase = await getSupabaseClient()
   const { data, error } = await supabase
     .from('tasks')
     .insert({
@@ -170,6 +208,11 @@ export async function createTask(userId: string, goalId: string, stageId: string
 }
 
 export async function getTodaysTask(userId: string) {
+  if (isGuestUser(userId)) {
+    return guestData.getTodaysGuestTask()
+  }
+  
+  const supabase = await getSupabaseClient()
   const today = new Date().toISOString().split('T')[0]
 
   const { data, error } = await supabase
@@ -197,7 +240,44 @@ export async function getTodaysTask(userId: string) {
   }
 }
 
+export async function getWeekTasks(userId: string) {
+  if (isGuestUser(userId)) {
+    return guestData.getWeekGuestTasks()
+  }
+  
+  const supabase = await getSupabaseClient()
+  const today = new Date()
+  const weekEnd = new Date(today)
+  weekEnd.setDate(weekEnd.getDate() + 7)
+  
+  const startDate = today.toISOString().split('T')[0]
+  const endDate = weekEnd.toISOString().split('T')[0]
+
+  const { data, error } = await supabase
+    .from('tasks')
+    .select('*, stage:roadmap_stages(*)')
+    .eq('user_id', userId)
+    .or(`scheduled_for.gte.${startDate},scheduled_for.lte.${endDate}`)
+    .order('scheduled_for', { ascending: true })
+
+  if (error || !data) return []
+
+  return data.map((task: any) => {
+    const stage = Array.isArray(task.stage) ? task.stage[0] : task.stage
+    return {
+      ...task,
+      status: task.status as 'pending' | 'in_progress' | 'completed' | 'skipped',
+      stage: stage ? {
+        title: stage.title,
+        description: stage.description,
+        category: stage.category
+      } : undefined
+    }
+  })
+}
+
 export async function updateTaskStatus(taskId: string, status: 'pending' | 'in_progress' | 'completed' | 'skipped') {
+  const supabase = await getSupabaseClient()
   const { error } = await supabase
     .from('tasks')
     .update({ status })
@@ -214,6 +294,11 @@ export async function completeTask(userId: string, taskId: string, completionDat
   what_got_in_way?: string
   energy_level?: number
 }) {
+  if (isGuestUser(userId)) {
+    return guestData.completeGuestTask(taskId, completionData)
+  }
+  
+  const supabase = await getSupabaseClient()
   const { error: completionError } = await supabase
     .from('task_completions')
     .insert({
@@ -233,6 +318,11 @@ export async function completeTask(userId: string, taskId: string, completionDat
 }
 
 export async function getTaskCompletions(userId: string, limit: number = 30) {
+  if (isGuestUser(userId)) {
+    return guestData.getGuestTaskCompletions()
+  }
+  
+  const supabase = await getSupabaseClient()
   const { data, error } = await supabase
     .from('task_completions')
     .select('*, task:tasks(*)')
@@ -247,6 +337,11 @@ export async function getTaskCompletions(userId: string, limit: number = 30) {
 // ---------- USER STATS ----------
 
 export async function getUserStats(userId: string) {
+  if (isGuestUser(userId)) {
+    return guestData.getGuestStats()
+  }
+  
+  const supabase = await getSupabaseClient()
   const { data: completions } = await supabase
     .from('task_completions')
     .select('*')

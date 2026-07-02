@@ -77,7 +77,7 @@ Return JSON format:
 
       const userPrompt = `Generate a daily mission for stage: ${currentStage.title}`
 
-      const response = await nvidiaNIMService.makeRequest('glm-5.1', [
+      const response = await nvidiaNIMService.makeRequest('qwen/qwen3.5-397b-a17b', [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: userPrompt }
       ], 0.7)
